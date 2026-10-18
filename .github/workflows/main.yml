@@ -1,0 +1,57 @@
+name: Build Windows EXE
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+
+      - name: Python core -> echo-code.exe
+        shell: bash
+        run: |
+          pip install pyinstaller
+          pyinstaller --onefile --name echo-code --add-data "web;web" --add-data "sql;sql" run_echo.py
+          mkdir -p release && cp dist/echo-code.exe release/
+
+      - name: C++ client -> echo-cli.exe
+        shell: bash
+        run: g++ -std=c++17 -O2 -static -o release/echo-cli.exe cli/echo_cli.cpp -lws2_32
+
+      - name: Rust guard -> echo-guard.exe
+        shell: bash
+        run: |
+          cargo build --release --manifest-path rust/Cargo.toml
+          cp rust/target/release/echo-guard.exe release/
+
+      - name: Java gateway -> EchoGateway app (jpackage)
+        shell: bash
+        run: |
+          mkdir -p build jarin
+          javac -d build java/EchoGateway.java
+          jar --create --file jarin/echo-gateway.jar --main-class EchoGateway -C build .
+          jpackage --type app-image --name EchoGateway --input jarin --main-jar echo-gateway.jar --main-class EchoGateway --dest release
+
+      - name: Add web files for the gateway
+        shell: bash
+        run: cp -r web release/web
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: echo-code-windows
+          path: release/
+
+      - name: Publish release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          cd release && 7z a ../echo-code-windows.zip . > /dev/null
+          gh release create "${GITHUB_REF_NAME}" ../echo-code-windows.zip --title "Echo Code ${GITHUB_REF_NAME}" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
