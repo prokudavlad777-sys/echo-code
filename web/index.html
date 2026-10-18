@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Echo Code</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><span class="logo">◈</span> Echo Code <small id="model">…</small></div>
+  <button id="new-chat" class="btn primary">+ New chat</button>
+  <ul id="chats" class="chat-list"></ul>
+</aside>
+<main class="main">
+  <div id="messages" class="messages"></div>
+  <div class="composer">
+    <textarea id="input" rows="1" placeholder="Ask Echo Code… (Enter to send, Shift+Enter for a new line)"></textarea>
+    <button id="send" class="btn primary">Send</button>
+  </div>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

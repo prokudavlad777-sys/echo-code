@@ -1,0 +1,11 @@
+[package]
+name = "echo-guard"
+version = "1.0.0"
+edition = "2021"
+description = "Echo Code system component: health watchdog and resource check for the 1.5B model"
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true

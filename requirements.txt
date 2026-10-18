@@ -1,0 +1,4 @@
+# The demo backend needs nothing. Install these only for the real 1.5B model:
+torch>=2.1
+transformers>=4.40
+accelerate>=0.30
